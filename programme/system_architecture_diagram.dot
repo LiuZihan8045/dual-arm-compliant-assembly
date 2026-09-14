@@ -1,0 +1,36 @@
+// System Architecture
+digraph {
+	dpi=300 rankdir=LR splines=ortho
+	node [fontname="Microsoft YaHei" shape=box style=filled]
+	subgraph cluster_0 {
+		bgcolor="#E6F3FF" color=blue label="Python Client (Controller / Brain)" style=dashed
+		Main [label="Main Script
+(main.py)" fillcolor=white]
+		Calc [label="协同位姿解算
+(Numpy/Scipy)" fillcolor=white]
+		SimLib [label="vrep.py / sim.py
+(Client Library)" fillcolor="#FFF2CC"]
+		Main -> Calc [label=" 规划轨迹"]
+		Calc -> SimLib [label=" 调用API"]
+	}
+	subgraph cluster_1 {
+		bgcolor="#FFE6E6" color=red label="V-REP / CoppeliaSim (Simulator / Body)" style=dashed
+		Scene [label="Simulation Scene
+(UR10, Obstacles)" fillcolor=white shape=component]
+		Lua [label="Child Script (Lua)
+(simIK Plugin)" fillcolor="#FFF2CC" shape=note]
+		Engine [label="Physics Engine
+(Dynamics & Collision)" fillcolor=white]
+		Lua -> Scene [label=" 驱动关节"]
+		Engine -> Scene [label=" 物理反馈"]
+	}
+	API [label="Remote API
+(Socket Port: 19997)" fillcolor="#E0E0E0" shape=ellipse style=filled]
+	SimLib -> API [label=" 发送指令
+(simxSetObjectPosition)" color=blue]
+	API -> Lua [label=" 同步触发
+(Synchronous Trigger)" color=blue]
+	Scene -> API [label=" 状态反馈
+(Handle/Joint Angle)" color=red style=dashed]
+	API -> SimLib [label=" 返回数据" color=red style=dashed]
+}
